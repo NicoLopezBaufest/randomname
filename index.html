@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/svg+xml" href="favicon-coffee.svg">
+    <title>Daily Random Picker IA</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:700,400&display=swap" rel="stylesheet">
+    <!-- Normalize CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+    <style>
+        body {
+            font-family: 'Montserrat', Arial, sans-serif;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: #222;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: rgba(255,255,255,0.97);
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(80,80,160,0.18);
+            padding: 2.5rem 2rem;
+            max-width: 520px;
+            width: 100%;
+            margin: 2rem auto;
+            text-align: center;
+        }
+        h1 {
+            font-size: 2.3rem;
+            margin-bottom: 1rem;
+            color: #2575fc;
+            letter-spacing: 1px;
+        }
+        p {
+            color: #444;
+            font-size: 1.1rem;
+        }
+        textarea {
+            width: 100%;
+            height: 110px;
+            margin-bottom: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #d1d8e0;
+            font-size: 1rem;
+            resize: vertical;
+            background: #f4f7f6;
+            transition: border 0.2s;
+        }
+        textarea:focus {
+            border-color: #2575fc;
+            outline: none;
+        }
+        .predefined-btn {
+            background: linear-gradient(90deg, #3498db 0%, #6a11cb 100%);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 0.6rem 1.2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 4px 2px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            box-shadow: 0 2px 8px rgba(80,80,160,0.08);
+        }
+        .predefined-btn:hover {
+            background: linear-gradient(90deg, #6a11cb 0%, #3498db 100%);
+            transform: scale(1.05);
+        }
+        .predefined-btn.selected {
+            background: #95a5a6 !important;
+            color: #fff !important;
+            cursor: pointer !important;
+            opacity: 0.8;
+        }
+        button {
+            background: linear-gradient(90deg, #2575fc 0%, #6a11cb 100%);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 0.8rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 8px 4px;
+            transition: background 0.3s, transform 0.2s;
+            box-shadow: 0 2px 8px rgba(80,80,160,0.1);
+        }
+        button:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+        #current {
+            font-size: 2em;
+            font-weight: bold;
+            color: #6a11cb;
+            margin: 24px 0 12px 0;
+            min-height: 1.2em;
+            letter-spacing: 2px;
+        }
+        #remaining {
+            font-size: 1rem;
+            color: #2575fc;
+            margin-bottom: 8px;
+        }
+        .footer {
+            margin-top: 2rem;
+            font-size: 0.95rem;
+            color: #fff;
+            opacity: 0.8;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 1.2rem 0.5rem;
+            }
+            h1 {
+                font-size: 1.4rem;
+            }
+            #current {
+                font-size: 1.1rem;
+            }
+        }
+        #btnPick {
+            display: block;
+            width: 80%;
+            max-width: 340px;
+            margin: 0.8rem auto 0.5rem auto;
+            font-size: 1.5rem;
+            padding: 1.2rem 0;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        #btnReset {
+            display: block;
+            width: 50%;
+            max-width: 130px;
+            margin: 1.5rem auto 0 auto;
+            font-size: 14px;
+            padding: 0.6rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎙️ Daily Baufest</h1>
+        <p>Escribe los nombres (uno por línea):</p>
+        <textarea id="nameList" placeholder="Ejemplo:\nJuan\nMaría\nCarlos"></textarea>
+        <br>
+        <div>
+            <button id="btnNico" class="predefined-btn" onclick="addName('Nico', this)">Nico</button>
+            <button id="btnLeo" class="predefined-btn" onclick="addName('Leo', this)">Leo</button>
+            <button id="btnMateo" class="predefined-btn" onclick="addName('Mateo', this)">Mateo</button>
+            <button id="btnAgus" class="predefined-btn" onclick="addName('Agus', this)">Agus</button>
+            <button id="btnLeti" class="predefined-btn" onclick="addName('Leti', this)">Leti</button>
+            <button id="btnDani" class="predefined-btn" onclick="addName('Dani', this)">Dani</button>
+            <button id="btnLu" class="predefined-btn" onclick="addName('Lu', this)">Lu</button>
+            <button id="btnLidio" class="predefined-btn" onclick="addName('Lidio', this)">Lidio</button>
+            <button id="btnLuis" class="predefined-btn" onclick="addName('Luis', this)">Luis</button>
+            <button id="btnCarla" class="predefined-btn" onclick="addName('Carla', this)">Carla</button>
+            <button id="btnHernan" class="predefined-btn" onclick="addName('Hernan', this)">Hernan</button>
+        </div>
+        <br>
+        <button id="btnPick" onclick="pickNext()">¿Quién empieza?</button>
+        <button id="btnReset" onclick="resetNames()">Reiniciar Lista</button>
+        <div id="current">¿Quién empieza?</div>
+        <div id="remaining"></div>
+    </div>
+    <div class="footer">
+        &copy; 2026 Daily Random Picker IA. Mejora visual y mejores prácticas por GitHub Copilot.
+    </div>
+    <script>
+        // Mejores prácticas: Separar datos, evitar variables globales, usar funciones claras
+        let availableNames = [];
+        let specialName = null;
+        let pickStarted = false;
+
+        document.getElementById('nameList').addEventListener('input', updateButtonStates);
+
+        function updateButtonStates() {
+            const textarea = document.getElementById('nameList');
+            const names = textarea.value.split('\n').map(n => n.trim()).filter(n => n !== "");
+            const buttons = document.querySelectorAll('.predefined-btn');
+            buttons.forEach(btn => {
+                const name = btn.textContent;
+                if (names.includes(name)) {
+                    btn.classList.add('selected');
+                    btn.disabled = false;
+                } else {
+                    btn.classList.remove('selected');
+                    btn.disabled = false;
+                }
+            });
+        }
+
+        function addName(name, button) {
+            const textarea = document.getElementById('nameList');
+            const currentText = textarea.value;
+            const names = currentText.split('\n').map(n => n.trim());
+            if (names.includes(name)) {
+                // Si ya está, lo quitamos
+                textarea.value = names.filter(n => n !== name).join('\n');
+            } else {
+                // Si no está, lo agregamos
+                textarea.value = currentText + (currentText ? '\n' : '') + name;
+            }
+            reset();
+            // updateButtonStates(); // Ya se llama dentro de reset
+        }
+
+        function reset() {
+            const text = document.getElementById('nameList').value;
+            let names = text.split('\n').map(n => n.trim()).filter(n => n !== "");
+            specialName = null;
+            availableNames = [];
+            names.forEach(name => {
+                if (name.toLowerCase() === 'leti') {
+                    specialName = name;
+                } else {
+                    availableNames.push(name);
+                }
+            });
+            document.getElementById('current').innerText = "Participantes";
+            updateRemaining();
+            updateButtonStates();
+            document.getElementById('btnPick').disabled = (availableNames.length === 0 && !specialName);
+            document.getElementById('btnPick').textContent = "¿Quién empieza?";
+            pickStarted = false;
+        }
+
+        function resetNames() {
+            // Borra todos los nombres del textarea
+            document.getElementById('nameList').value = "";
+            reset();
+        }
+
+        function pickNext() {
+            if (!pickStarted) {
+                document.getElementById('btnPick').textContent = "¡Siguiente Persona!";
+                pickStarted = true;
+            }
+            if (availableNames.length === 0 && !specialName) {
+                reset();
+                if (availableNames.length === 0 && !specialName) return;
+            }
+
+            if (availableNames.length > 0) {
+                const index = Math.floor(Math.random() * availableNames.length);
+                const winner = availableNames.splice(index, 1)[0];
+                document.getElementById('current').innerText = "👉 " + winner;
+                updateRemaining();
+                if (availableNames.length === 0 && !specialName) {
+                    document.getElementById('btnPick').disabled = true;
+                    document.getElementById('remaining').innerText = "¡Todos han pasado!";
+                }
+            } else if (specialName) {
+                document.getElementById('current').innerText = "👸" + specialName;
+                specialName = null;
+                document.getElementById('btnPick').disabled = true;
+                document.getElementById('remaining').innerText = "¡Todos han pasado!";
+            }
+        }
+
+        function updateRemaining() {
+            let remainingText = "Restantes: " + availableNames.length;
+            if (specialName) {
+                remainingText += " (más " + specialName + ")";
+            }
+            document.getElementById('remaining').innerText = remainingText;
+        }
+
+        // Inicializar al cargar
+        window.onload = reset;
+    </script>
+</body>
+</html>
