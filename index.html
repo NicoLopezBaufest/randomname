@@ -42,6 +42,7 @@
         }
         textarea {
             width: 100%;
+            box-sizing: border-box;
             height: 110px;
             margin-bottom: 12px;
             padding: 12px;
@@ -144,6 +145,22 @@
             font-size: 14px;
             padding: 0.6rem 0;
         }
+        .select-all-link {
+            display: block;
+            text-align: center;
+            margin-top: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #2575fc;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            user-select: none;
+            transition: color 0.2s;
+        }
+        .select-all-link:hover {
+            color: #6a11cb;
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -165,6 +182,7 @@
             <button id="btnMateo" class="predefined-btn" onclick="addName('Mateo', this)">Mateo</button>
             <button id="btnLidio" class="predefined-btn" onclick="addName('Lidio', this)">Lidio</button>
         </div>
+        <span class="select-all-link" onclick="selectAll()">Todos</span>
         <br>
         <button id="btnPick" onclick="pickNext()">¿Quién empieza?</button>
         <button id="btnReset" onclick="resetNames()">Reiniciar Lista</button>
@@ -272,6 +290,13 @@
                 remainingText += " (más " + specialName + ")";
             }
             document.getElementById('remaining').innerText = remainingText;
+        }
+
+        function selectAll() {
+            const names = [...document.querySelectorAll('.predefined-btn')]
+                .map(btn => btn.textContent.trim());
+            document.getElementById('nameList').value = names.join('\n');
+            reset();
         }
 
         // Inicializar al cargar
