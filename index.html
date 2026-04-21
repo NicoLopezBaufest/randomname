@@ -40,22 +40,13 @@
             color: #444;
             font-size: 1.1rem;
         }
-        textarea {
-            width: 100%;
-            box-sizing: border-box;
-            height: 110px;
-            margin-bottom: 12px;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #d1d8e0;
-            font-size: 1rem;
-            resize: vertical;
-            background: #f4f7f6;
-            transition: border 0.2s;
-        }
-        textarea:focus {
-            border-color: #2575fc;
-            outline: none;
+        #timer {
+            font-size: 4rem;
+            font-weight: 700;
+            color: #6a11cb;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
         }
         .predefined-btn {
             background: linear-gradient(90deg, #3498db 0%, #6a11cb 100%);
@@ -166,21 +157,20 @@
 <body>
     <div class="container">
         <h1>🎙️ Daily Baufest</h1>
-        <p>Escribe los nombres (uno por línea):</p>
-        <textarea id="nameList" placeholder="Ejemplo:\nJuan\nMaría\nCarlos"></textarea>
-        <br>
+        <p>Selecciona los participantes:</p>
+        <div id="timer">00:00</div>
         <div>
-            <button id="btnHernan" class="predefined-btn" onclick="addName('Hernan', this)">Hernan</button>
-            <button id="btnLuis" class="predefined-btn" onclick="addName('Luis', this)">Luis</button>
-            <button id="btnCarla" class="predefined-btn" onclick="addName('Carla', this)">Carla</button>
-            <button id="btnAgus" class="predefined-btn" onclick="addName('Agus', this)">Agus</button>
-            <button id="btnDani" class="predefined-btn" onclick="addName('Dani', this)">Dani</button>
-            <button id="btnLeti" class="predefined-btn" onclick="addName('Leti', this)">Leti</button>
-            <button id="btnNico" class="predefined-btn" onclick="addName('Nico', this)">Nico</button>
-            <button id="btnLu" class="predefined-btn" onclick="addName('Lu', this)">Lu</button>
-            <button id="btnLeo" class="predefined-btn" onclick="addName('Leo', this)">Leo</button>
-            <button id="btnMateo" class="predefined-btn" onclick="addName('Mateo', this)">Mateo</button>
-            <button id="btnLidio" class="predefined-btn" onclick="addName('Lidio', this)">Lidio</button>
+            <button id="btnHernan" class="predefined-btn" onclick="toggleName('Hernan', this)">Hernan</button>
+            <button id="btnLuis" class="predefined-btn" onclick="toggleName('Luis', this)">Luis</button>
+            <button id="btnCarla" class="predefined-btn" onclick="toggleName('Carla', this)">Carla</button>
+            <button id="btnAgus" class="predefined-btn" onclick="toggleName('Agus', this)">Agus</button>
+            <button id="btnDani" class="predefined-btn" onclick="toggleName('Dani', this)">Dani</button>
+            <button id="btnLeti" class="predefined-btn" onclick="toggleName('Leti', this)">Leti</button>
+            <button id="btnNico" class="predefined-btn" onclick="toggleName('Nico', this)">Nico</button>
+            <button id="btnLu" class="predefined-btn" onclick="toggleName('Lu', this)">Lu</button>
+            <button id="btnLeo" class="predefined-btn" onclick="toggleName('Leo', this)">Leo</button>
+            <button id="btnMateo" class="predefined-btn" onclick="toggleName('Mateo', this)">Mateo</button>
+            <button id="btnLidio" class="predefined-btn" onclick="toggleName('Lidio', this)">Lidio</button>
         </div>
         <span class="select-all-link" onclick="selectAll()">Todos</span>
         <br>
@@ -193,47 +183,20 @@
         &copy; 2026 Daily Random Picker. Created and Tested by NicoLopez.
     </div>
     <script>
-        // Mejores prácticas: Separar datos, evitar variables globales, usar funciones claras
         let availableNames = [];
         let specialName = null;
         let pickStarted = false;
+        let timerInterval = null;
+        let elapsed = 0;
 
-        document.getElementById('nameList').addEventListener('input', updateButtonStates);
-
-        function updateButtonStates() {
-            const textarea = document.getElementById('nameList');
-            const names = textarea.value.split('\n').map(n => n.trim()).filter(n => n !== "");
-            const buttons = document.querySelectorAll('.predefined-btn');
-            buttons.forEach(btn => {
-                const name = btn.textContent;
-                if (names.includes(name)) {
-                    btn.classList.add('selected');
-                    btn.disabled = false;
-                } else {
-                    btn.classList.remove('selected');
-                    btn.disabled = false;
-                }
-            });
-        }
-
-        function addName(name, button) {
-            const textarea = document.getElementById('nameList');
-            const currentText = textarea.value;
-            const names = currentText.split('\n').map(n => n.trim());
-            if (names.includes(name)) {
-                // Si ya está, lo quitamos
-                textarea.value = names.filter(n => n !== name).join('\n');
-            } else {
-                // Si no está, lo agregamos
-                textarea.value = currentText + (currentText ? '\n' : '') + name;
-            }
+        function toggleName(name, button) {
+            button.classList.toggle('selected');
             reset();
-            // updateButtonStates(); // Ya se llama dentro de reset
         }
 
-        function reset() {
-            const text = document.getElementById('nameList').value;
-            let names = text.split('\n').map(n => n.trim()).filter(n => n !== "");
+        function loadSelectedNames() {
+            const selectedButtons = document.querySelectorAll('.predefined-btn.selected');
+            let names = [...selectedButtons].map(btn => btn.textContent.trim());
             specialName = null;
             availableNames = [];
             names.forEach(name => {
@@ -243,23 +206,69 @@
                     availableNames.push(name);
                 }
             });
+        }
+
+        function updateRemaining() {
+            let remainingText = "Restantes: " + availableNames.length;
+            if (specialName) {
+                remainingText += " (más " + specialName + ")";
+            }
+            document.getElementById('remaining').innerText = remainingText;
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            elapsed = 0;
+            timerInterval = setInterval(() => {
+                elapsed++;
+                document.getElementById('timer').innerText = formatTime(elapsed);
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        function reset() {
+            loadSelectedNames();
             document.getElementById('current').innerText = "Participantes";
             updateRemaining();
-            updateButtonStates();
             document.getElementById('btnPick').disabled = (availableNames.length === 0 && !specialName);
             document.getElementById('btnPick').textContent = "¿Quién empieza?";
+            stopTimer();
+            document.getElementById('timer').innerText = "00:00";
+            elapsed = 0;
             pickStarted = false;
         }
 
         function resetNames() {
-            // Borra todos los nombres del textarea
-            document.getElementById('nameList').value = "";
+            document.querySelectorAll('.predefined-btn').forEach(btn => btn.classList.remove('selected'));
             reset();
         }
 
         function pickNext() {
+            const btnPick = document.getElementById('btnPick');
+            
+            // Si el botón dice "Terminar", solo detener timer y deshabilitar botón
+            if (btnPick.textContent === "Terminar") {
+                stopTimer();
+                btnPick.disabled = true;
+                return;
+            }
+
             if (!pickStarted) {
-                document.getElementById('btnPick').textContent = "¡Siguiente Persona!";
+                loadSelectedNames();
+                startTimer();
+                btnPick.textContent = "¡Siguiente Persona!";
                 pickStarted = true;
             }
             if (availableNames.length === 0 && !specialName) {
@@ -273,33 +282,22 @@
                 document.getElementById('current').innerText = "👉 " + winner;
                 updateRemaining();
                 if (availableNames.length === 0 && !specialName) {
-                    document.getElementById('btnPick').disabled = true;
+                    btnPick.textContent = "Terminar";
                     document.getElementById('remaining').innerText = "¡Todos han pasado!";
                 }
             } else if (specialName) {
                 document.getElementById('current').innerText = "👸" + specialName;
                 specialName = null;
-                document.getElementById('btnPick').disabled = true;
+                btnPick.textContent = "Terminar";
                 document.getElementById('remaining').innerText = "¡Todos han pasado!";
             }
         }
 
-        function updateRemaining() {
-            let remainingText = "Restantes: " + availableNames.length;
-            if (specialName) {
-                remainingText += " (más " + specialName + ")";
-            }
-            document.getElementById('remaining').innerText = remainingText;
-        }
-
         function selectAll() {
-            const names = [...document.querySelectorAll('.predefined-btn')]
-                .map(btn => btn.textContent.trim());
-            document.getElementById('nameList').value = names.join('\n');
+            document.querySelectorAll('.predefined-btn').forEach(btn => btn.classList.add('selected'));
             reset();
         }
 
-        // Inicializar al cargar
         window.onload = reset;
     </script>
 </body>
