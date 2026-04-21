@@ -191,7 +191,30 @@
 
         function toggleName(name, button) {
             button.classList.toggle('selected');
-            reset();
+            
+            // Si la daily ya comenzó, agregar/remover la persona sin reiniciar
+            if (pickStarted) {
+                if (button.classList.contains('selected')) {
+                    // Agregar persona a la lista disponible
+                    if (name.toLowerCase() === 'leti') {
+                        specialName = name;
+                    } else {
+                        availableNames.push(name);
+                    }
+                } else {
+                    // Remover persona de la lista disponible
+                    if (name.toLowerCase() === 'leti') {
+                        specialName = null;
+                    } else {
+                        availableNames = availableNames.filter(n => n !== name);
+                    }
+                }
+                updateRemaining();
+                document.getElementById('btnPick').disabled = (availableNames.length === 0 && !specialName);
+            } else {
+                // Si no ha comenzado, hacer reset normal
+                reset();
+            }
         }
 
         function loadSelectedNames() {
