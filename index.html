@@ -188,12 +188,14 @@
         let pickStarted = false;
         let timerInterval = null;
         let elapsed = 0;
+        let startTime = null;
 
         function toggleName(name, button) {
             button.classList.toggle('selected');
             
             // Si la daily ya comenzó, agregar/remover la persona sin reiniciar
             if (pickStarted) {
+                const btnPick = document.getElementById('btnPick');
                 if (button.classList.contains('selected')) {
                     // Agregar persona a la lista disponible
                     if (name.toLowerCase() === 'leti') {
@@ -210,7 +212,22 @@
                     }
                 }
                 updateRemaining();
-                document.getElementById('btnPick').disabled = (availableNames.length === 0 && !specialName);
+                
+                // Actualizar estado del botón según si hay personas disponibles
+                const hasAvailable = availableNames.length > 0 || specialName;
+                
+                // Si no hay personas disponibles, mostrar "Terminar" y mantenerlo habilitado
+                if (!hasAvailable) {
+                    btnPick.textContent = "Terminar";
+                    btnPick.disabled = false;
+                    document.getElementById('remaining').innerText = "¡Todos han pasado!";
+                } else {
+                    // Si hay personas disponibles y el botón estaba en "Terminar", cambiar a "¡Siguiente Persona!"
+                    if (btnPick.textContent === "Terminar") {
+                        btnPick.textContent = "¡Siguiente Persona!";
+                    }
+                    btnPick.disabled = false;
+                }
             } else {
                 // Si no ha comenzado, hacer reset normal
                 reset();
@@ -247,11 +264,11 @@
 
         function startTimer() {
             if (timerInterval) clearInterval(timerInterval);
-            elapsed = 0;
+            startTime = performance.now();
             timerInterval = setInterval(() => {
-                elapsed++;
+                elapsed = Math.floor((performance.now() - startTime) / 1000);
                 document.getElementById('timer').innerText = formatTime(elapsed);
-            }, 1000);
+            }, 100);
         }
 
         function stopTimer() {
